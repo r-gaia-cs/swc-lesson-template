@@ -31,7 +31,7 @@
       <div class="span10 offset1">
       <!-- start content -->
       $if(title)$
-      <h1 class="title">$title$</h1>
+      <h1>$title$</h1>
       $endif$
       $body$
       </div>
