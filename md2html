@@ -1,0 +1,10 @@
+#!/bin/bash
+#
+# Use pandoc to generate HTML from Markdown
+
+mkdir -p _site
+
+for file in *.md
+do
+    pandoc -s -f markdown -t html5 -o ${file/\.md/\.html} ${file}
+done
