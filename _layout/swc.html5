@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>$if(title-prefix)$$title-prefix$ - $endif$$pagetitle$</title>
   <!-- Begin bc/_includes/header.html -->
-  <link rel="shortcut icon" type="image/x-icon" href="http://cdn.software-carpentry/favicon.ico" />
+  <link rel="shortcut icon" type="image/x-icon" href="http://cdn.software-carpentry.org/favicon.ico" />
   <link rel="stylesheet" type="text/css" href="http://cdn.software-carpentry.org/css/bootstrap/bootstrap.css" />
   <link rel="stylesheet" type="text/css" href="http://cdn.software-carpentry.org/css/bootstrap/bootstrap-responsive.css" />
   <link rel="stylesheet" type="text/css" href="http://cdn.software-carpentry.org/css/swc.css" />

@@ -7,8 +7,7 @@ mkdir -p _site
 for file in *.md
 do
     pandoc \
-        --data-dir=_layout \
-        --template=swc \
+        --template=_layout/swc \
         -f markdown -t html5 \
         -o _site/${file/\.md/\.html} ${file}
 done
