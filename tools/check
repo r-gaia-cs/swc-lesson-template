@@ -20,21 +20,8 @@ import os
 import re
 import sys
 
-try:
-    # Code tested with CommonMark version 0.5.4; API may change
-    import CommonMark
-except ImportError:
-    ERROR_MESSAGE = """This program requires the CommonMark python package.
-Install using
-
-    # pip install commonmark
-
-or
-
-    # easy_install commonmark
-"""
-    print(ERROR_MESSAGE)
-    sys.exit(1)
+import pypandoc
+import pandocfilters
 
 import validation_helpers as vh
 
@@ -61,71 +48,54 @@ class MarkdownValidator(object):
             self.markdown_dir = os.path.dirname(filename)
             self.lesson_dir = self.markdown_dir
             with open(filename, 'rU') as f:
-                self.markdown = f.read()
+                ast_string = pypandoc.convert(f, 'json', 'markdown')
         else:
             # Look for linked content in ../pages (relative to this file)
             self.lesson_dir = os.path.abspath(
                 os.path.join(os.path.dirname(__file__), os.pardir))
 
             self.markdown_dir = self.lesson_dir
-            self.markdown = markdown
+            ast_string = pypandoc.convert(markdown, 'json', 'markdown')
 
-        ast = self._parse_markdown(self.markdown)
-        self.ast = vh.CommonMarkHelper(ast)
+        ast = json.loads(ast_string)
+        self.header = ast[0]["unMeta"]
+        self.ast = ast[1]
 
-    def _parse_markdown(self, markdown):
-        parser = CommonMark.DocParser()
-        ast = parser.parse(markdown)
-        return ast
-
-    def _validate_hrs(self):
-        """Validate header
+    def _validate_header(self):
+        """Validate header.
 
         Verify that the header section at top of document
-        is bracketed by two horizontal rules"""
+        is bracketed by two horizontal rules."""
         valid = True
-        try:
-            hr_nodes = [self.ast.children[0], self.ast.children[2]]
-        except IndexError:
+
+        if len(self.header) == 0:
             logging.error(
                 "In {0}: "
                 "Document must include header sections".format(self.filename))
-            return False
+            valid = False
+        else:
+            for key in self.header:
+                if key not in self.DOC_HEADERS:
+                    logging.warning(
+                        "In {0}: "
+                        "Unrecognized label in header section: {1}".format(
+                            self.filename, label))
+                    valid = False
+                else:
+                    if not self.DOC_HEADERS[label](content):
+                        logging.error(
+                            "In {0}: "
+                            "Document header field for label {1} "
+                            "does not follow expected format".format(self.filename, label))
+                        valid = False
 
-        for hr in hr_nodes:
-            if not self.ast.is_hr(hr):
-                logging.error(
-                    "In {0}: "
-                    "Expected --- at line: {1}".format(
-                        self.filename, hr.start_line))
-                valid = False
         return valid
 
-    def _validate_one_doc_header_row(self, text):
-        """Validate a single row of the document header section"""
-        label, content = text.split(":", 1)
-        if label not in self.DOC_HEADERS:
-            logging.warning(
-                "In {0}: "
-                "Unrecognized label in header section: {1}".format(
-                    self.filename, label))
-            return False
-
-        validation_function = self.DOC_HEADERS[label]
-        validate_header = validation_function(content)
-        if not validate_header:
-            logging.error(
-                "In {0}: "
-                "Document header field for label {1} "
-                "does not follow expected format".format(self.filename, label))
-        return validate_header
-
-    # Methods related to specific validation. Can override specific tests.
-    def _validate_doc_headers(self):
-        """Validate the document header section.
+    def _validate_headings(self):
+        """Validate headings present at the document.
 
         Pass only if the header of the document contains the specified
-            sections with the expected contents"""
+        sections with the expected contents."""
 
         # Header section should be wrapped in hrs
         has_hrs = self._validate_hrs()
