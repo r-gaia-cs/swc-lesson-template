@@ -15,22 +15,25 @@ submodules or clever tricks with symbolic links).
     > or run `make` in this directory for a list of helpful commands.
     ~~~
 
-2.  Other files in the root directory: the source of the lesson's web
+2.  `METADATA`: store some metadata that are used to build the EPUB version of
+    the lesson.
+
+3.  Other files in the root directory: the source of the lesson's web
     pages (and possibly auxiliary files like IPython Notebooks and R
     Markdown files).
 
-3.  `code/`, `data/`, and `fig/`: sub-directories containing sample
+4.  `code/`, `data/`, and `fig/`: sub-directories containing sample
     code, data files, and figures.  See "Code, Data, and Figures"
     below.
 
-4.  `css/`, `img/`, `js/`, and `deck.js/`: style sheets, artwork, and
+5.  `css/`, `img/`, `js/`, and `deck.js/`: style sheets, artwork, and
     Javascript used in the lesson's web site.  See "Support Files"
     below.
 
-5.  `_layouts/` and `_includes/`: page templates and inclusions. See
+6.  `_layouts/` and `_includes/`: page templates and inclusions. See
     "Support Files" below.
 
-6. `tools/`: tools for managing lessons. See "Tools" below.
+7. `tools/`: tools for managing lessons. See "Tools" below.
 
 # Code, Data, and Figures
 

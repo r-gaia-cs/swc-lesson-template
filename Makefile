@@ -3,11 +3,22 @@ SRC_RMD = $(wildcard ??-*.Rmd)
 DST_RMD = $(patsubst %.Rmd,%.md,$(SRC_RMD))
 
 # All Markdown files (hand-written and generated).
-SRC_MD = $(wildcard *.md) $(DST_RMD)
+SRC_MD = index.md \
+	 $(wildcard ??-*.md) \
+	 $(DST_RMD) \
+	 motivation.md \
+	 reference.md \
+	 discussion.md \
+	 instructors.md
 DST_HTML = $(patsubst %.md,%.html,$(SRC_MD))
 
 # All outputs.
 DST_ALL = $(DST_HTML)
+
+# Temporary file for all-in-one
+ALL_IN_ONE_MD=all-in-one.md
+ALL_IN_ONE_HTML=all-in-one.html
+ALL_IN_ONE_EPUB=all-in-one.epub
 
 # Inclusions.
 INCLUDES = \
@@ -39,6 +50,38 @@ motivation.html : motivation.md _layouts/slides.html
 	--filter=tools/filters/id4glossary.py \
 	$(INCLUDES) \
 	-o $@ $<
+
+## epub     : Build epub version of lesson. (Experimental)
+epub: ${ALL_IN_ONE_EPUB}
+
+# Create all in one version of the lesson
+# 
+# THIS IS EXPERIMENTAL.
+${ALL_IN_ONE_MD}: ${SRC_MD} LICENSE.md
+	cp METADATA $@
+	for file in $^; \
+	    do \
+	    pandoc -t markdown \
+	    --template=_layouts/page \
+	    $${file} \
+	    >> $@; \
+	    echo >> $@; \
+	    done
+
+${ALL_IN_ONE_HTML}: ${ALL_IN_ONE_MD}
+	pandoc -s -f markdown -t html \
+	    --template=_layouts/page \
+	    --filter=tools/filters/blockquote2div.py \
+	    --filter=tools/filters/id4glossary.py \
+	    --filter=tools/filters/epub.py \
+	    $(INCLUDES) \
+	    -o $@ $<
+
+${ALL_IN_ONE_EPUB}: ${ALL_IN_ONE_MD}
+	pandoc -f markdown -t epub \
+	    --filter=tools/filters/id4glossary.py \
+	    --filter=tools/filters/epub.py \
+	    -o $@ $<
 
 ## unittest : Run unit test (for Python 2 and 3)
 unittest: tools/check.py tools/validation_helpers.py tools/test_check.py
