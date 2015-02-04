@@ -26,6 +26,8 @@ FILTERS = $(wildcard tools/filters/*.py)
 ALL_IN_ONE_MD=all-in-one.md
 ALL_IN_ONE_HTML=all-in-one.html
 ALL_IN_ONE_EPUB=all-in-one.epub
+ALL_IN_ONE_LATEX=all-in-one.tex
+ALL_IN_ONE_PDF=all-in-one.pdf
 
 # Inclusions.
 INCLUDES = \
@@ -68,6 +70,9 @@ preview : $(DST_ALL)
 ## epub     : Build epub version of lesson. (Experimental)
 epub: ${ALL_IN_ONE_EPUB}
 
+## pdf      : Build pdf version of lesson. (Experimental)
+pdf: ${ALL_IN_ONE_PDF}
+
 # Create all in one version of the lesson
 #
 # THIS IS EXPERIMENTAL.
@@ -96,6 +101,29 @@ ${ALL_IN_ONE_EPUB}: ${ALL_IN_ONE_MD}
 	    --filter=tools/filters/id4glossary.py \
 	    --filter=tools/filters/epub.py \
 	    -o $@ $<
+
+${ALL_IN_ONE_LATEX}: ${ALL_IN_ONE_MD}
+	pandoc -f markdown -t latex \
+	    --template=_layouts/book \
+	    --standalone \
+	    --chapters \
+	    --listings \
+	    -o $@ $<
+	sed -i \
+	    -e 's/\.gif//g' \
+	    -e 's/\.svg//g' \
+	    $@
+	for image in $$(find . -name '*.gif'); \
+	do \
+	    convert $${image} $${image/gif/png}; \
+	done
+	for image in $$(find . -name '*.svg'); \
+	do \
+	    convert $${image} $${image/svg/png}; \
+	done
+
+${ALL_IN_ONE_PDF}: ${ALL_IN_ONE_LATEX}
+	latexmk -pdf $<
 
 # Pattern to convert R Markdown to Markdown.
 %.md: %.Rmd $(R_CHUNK_OPTS) tools/check_knitr_version.R
